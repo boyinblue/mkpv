@@ -77,6 +77,7 @@ def parse(html):
 def get(url):
     with urllib.request.urlopen(url) as response:
         response_str = response.read().decode('utf-8')
+        return response_str
 
 
 if __name__ == '__main__':
