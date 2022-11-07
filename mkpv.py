@@ -27,8 +27,11 @@ def make_preview():
     import url_preview
 
     html = url_preview.get(url)
-    raw_textbox.delete(1.0, END)
-    raw_textbox.insert(END, html)
+    if html != None:
+        raw_textbox.delete(1.0, END)
+        raw_textbox.insert(END, html)
+    else:
+        messagebox.showinfo("Unable to load URL", url)
 
     dic = url_preview.parse(html.split('\n'))
 

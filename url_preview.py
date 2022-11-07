@@ -3,17 +3,18 @@
 import urllib.request
 import re
 
-p_meta = re.compile("<meta .* />")
-p_property = re.compile("property=\"[^\"]*\" ")
-p_content = re.compile("content=\"[^\"]*\"")
+p_meta = re.compile("<meta .*?[\" /]>")
+p_property = re.compile("property=\"[^\"]*?\"")
+p_content = re.compile("content=\"[^\"]*?\"")
+
+p_iframe = re.compile("<iframe .*?>")
+p_src = re.compile("src=\"[^\"]*?\"")
 
 dic = {'og:title': '', 'og:description': '', 'og:image': ''}
 
 def get_meta_tag(line):
     extracted = p_meta.findall(line)
-    if len( extracted ) == 0:
-        return None
-    return extracted[0]
+    return extracted
 
 def get_property(line):
     property = p_property.findall(line)
@@ -27,30 +28,42 @@ def get_content(line):
         return None
     return content[0][len("content="):]
 
-def parse_line(line):
-    print("Line :", line)
-    extracted = get_meta_tag(line)
-    if extracted == None:
-        return
-    property = get_property(line)
-    content = get_content(line)
-    if property != None:
-        print("property : ", property)
-        print("content : ", content)
-        dic[property] = content
-    if property == "og:title":
-        dic['og:title'] = content
-        print("og:title :", content)
-    elif property == "og:description":
-        dic['og:description'] = content
-        print("og:description :", content)
-    elif property == "og:image":
-        dic['og:image'] = content
-        print("og:image :", content)
+def get_iframe_tag(line):
+    extracted = p_iframe.findall(line)
+    return extracted
 
-    #            atoms = item.split(' ')
-    #            for atom in atoms:
-    #                print(atom)
+def get_src(line):
+    srcs = p_src.findall(line)
+    if len(srcs) == 0:
+        return None
+    return srcs[0][len("src="):].replace('\"', '').strip()
+
+def parse_line(line):
+    #print("Line :", line)
+    extracted = get_meta_tag(line)
+    for item in extracted:
+        #print("item :", item)
+        property = get_property(item)
+        content = get_content(item)
+        if property != None:
+            print("property : ", property)
+            print("content : ", content)
+            dic[property] = content
+
+    extracted = get_iframe_tag(line)
+    for item in extracted:
+        #print("item :", item)
+        src = get_src(item)
+        #print("src :", src)
+        if src == None:
+            continue
+        elif src.startswith("/PostView.naver?"):
+            print("download from naver")
+            new_url = "https://blog.naver.com" + src
+            print("new url :", new_url)
+            html = get(new_url)
+            print("new content :", html)
+            parse(html)
 
 def parse(html):
     if type(html) is str:
@@ -63,11 +76,11 @@ def parse(html):
 
 def get(url):
     with urllib.request.urlopen(url) as response:
-        return response.read().decode('utf-8')
+        response_str = response.read().decode('utf-8')
 
 
 if __name__ == '__main__':
-    sample_file = open('sample.html', 'r')
+    sample_file = open('sample3.html', 'r')
     lines = sample_file.readlines()
     dic = parse(lines)
     print(dic)
