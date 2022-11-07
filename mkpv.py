@@ -6,7 +6,7 @@ from tkinter import ttk, messagebox
 # Make Main Window
 root = Tk()
 root.title("Make Preview From URL")
-root.geometry("1000x650")
+root.geometry("1024x650")
 root.resizable(False, False)
 
 # Make Text Box
@@ -49,7 +49,7 @@ def make_preview():
     preview_textbox.insert(END, "{{% assign preview_url = '{}' %}}\n".format(url))
     preview_textbox.insert(END, "{{% assign preview_title = '{}' %}}\n".format(dic['og:title']))
     preview_textbox.insert(END, "{{% assign preview_description = '{}' %}}\n".format(dic['og:description']))
-    preview_textbox.insert(END, "{{% include body-preview.html %}}\n")
+    preview_textbox.insert(END, "{% include body-preview.html %}\n")
 
 ok_btn = ttk.Button(root, text="Make", width=10, command=make_preview)
 ok_btn.grid(column=3, row=0)
@@ -59,6 +59,12 @@ raw_label = Label(root, text = "Raw")
 raw_label.grid(column=0, row=2)
 raw_textbox = Text(root, width=100, height=10)
 raw_textbox.grid(column=1, row=2)
+
+# Scroll Bar
+scroll = Scrollbar()
+raw_textbox.config(yscrollcommand=scroll.set)
+scroll.grid(column=2, row=2)
+scroll["command"] = raw_textbox.yview
 
 # Parsed Data
 title_label = Label(root, text = "og:title")
@@ -86,7 +92,6 @@ dic_textbox = Text(root, width=100, height=10)
 dic_textbox.grid(column=1, row=6)
 
 # Make Result Text Box
-
 preview_label = Label(root, text="Preview")
 preview_label.grid(column=0, row=7)
 preview_textbox = Text(root, width=100, height=10)
