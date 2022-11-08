@@ -26,7 +26,7 @@ def get_content(line):
     content = p_content.findall(line)
     if len( content ) == 0:
         return None
-    return content[0][len("content="):]
+    return content[0][len("content="):].replace('\"', '').strip()
 
 def get_iframe_tag(line):
     extracted = p_iframe.findall(line)
