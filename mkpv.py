@@ -6,17 +6,17 @@ from tkinter import ttk, messagebox
 # Make Main Window
 root = Tk()
 root.title("Make Preview From URL")
-root.geometry("1024x650")
+root.geometry("1024x768")
 root.resizable(False, False)
 
 # Make Text Box
 url_label = Label(root, text="URL")
 url_label.grid(column=0, row=0)
-url_str = "https://boyinblue.github.io"
+url_str = StringVar()
+url_str.set("https://boyinblue.github.io")
 url_textbox = ttk.Entry(root, width=100, textvariable=url_str)
 url_textbox.grid(column=1, row=0)
 url_textbox.focus()
-url_textbox.insert(END, url_str)
 
 
 # Make preview Button
@@ -55,7 +55,21 @@ def make_preview():
     preview_textbox.insert(END, "{% include body-preview.html %}\n")
 
 ok_btn = ttk.Button(root, text="Make", width=10, command=make_preview)
-ok_btn.grid(column=3, row=0)
+ok_btn.grid(column=0, row=1)
+
+# Make Clear Button
+def clear_info():
+    url_str.set("")
+    raw_textbox.delete(1.0, END)
+    title_textbox.delete(1.0, END)
+    desc_textbox.delete(1.0, END)
+    image_textbox.delete(1.0, END)
+    dic_textbox.delete(1.0, END)
+    preview_textbox.delete(1.0, END)
+#    messagebox.showinfo("Make Preview", url)
+
+clear_btn = ttk.Button(root, text="Clear", width=10, command=clear_info)
+clear_btn.grid(column=1, row=1)
 
 # Make Raw Data Text Box
 raw_label = Label(root, text = "Raw")
@@ -100,4 +114,15 @@ preview_label.grid(column=0, row=7)
 preview_textbox = Text(root, width=100, height=10)
 preview_textbox.grid(column=1, row=7)
 
+# Enter Key Received
+def enter_key_callback(event):
+    ok_btn.focus()
+    make_preview()
+
+root.bind('<Return>', enter_key_callback)
+
+# ESC Key Received
+root.bind('<Escape>', lambda e: root.destroy())
+
+# infinite loop
 root.mainloop()
