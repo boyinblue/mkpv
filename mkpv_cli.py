@@ -6,7 +6,7 @@ def make_preview():
 
     import url_preview
 
-    html = url_preview.get(url)
+    html = url_preview.get_text_from_url(url)
     if html == None:
         messagebox.showinfo("Unable to load URL", url)
         return 255
