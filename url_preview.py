@@ -102,12 +102,14 @@ def get_text_from_url(url):
     response = get_from_url(url)
     if not response:
         return None
-    try:
-        print("Try to decode with utf-8")
-        return response.decode("utf-8")
-    except:
-        print("Try to decode with euc-kr")
-        return response.decode('euc-kr')
+
+    encodes = [ "utf-8", "euc-kr", "KSC5601", "cp949" ]
+    for enc in encodes:
+        try:
+            print("Try to decode with {}".format(enc))
+            return response.decode(enc)
+        except:
+            print("Failed!")
 
 """ URL에서 읽어오기 """
 def get_from_url(url):
