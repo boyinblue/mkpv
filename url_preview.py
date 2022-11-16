@@ -1,17 +1,29 @@
 #!/usr/bin/env python3
 
-import urllib.request
 import re
 
+""" URL 파싱 데이터 """
+url_parse = None
+
+""" 메타 테그 추출 정규표현식 """
 p_meta = re.compile("<meta .*?[\" /]>")
+
+""" 메타 테그의 property 값 추출 """
 p_property = re.compile("property=\"[^\"]*?\"")
+
+""" 메타 테그의 content 값 추출 """
 p_content = re.compile("content=\"[^\"]*?\"")
 
+""" iframe 테그 추출 """
 p_iframe = re.compile("<iframe .*?>")
+
+""" iframe의 src 값 추출 """
 p_src = re.compile("src=\"[^\"]*?\"")
 
+""" 파싱된 값을 저장하는 dictionary """
 dic = {'og:title': '', 'og:description': '', 'og:image': ''}
 
+""" 정규표현식으로부터 값 추출하는 메쏘드들 """
 def get_meta_tag(line):
     extracted = p_meta.findall(line)
     return extracted
@@ -38,6 +50,7 @@ def get_src(line):
         return None
     return srcs[0][len("src="):].replace('\"', '').strip()
 
+""" 라인별로 값을 추출한다. """
 def parse_line(line):
     #print("Line :", line)
     extracted = get_meta_tag(line)
@@ -52,19 +65,28 @@ def parse_line(line):
 
     extracted = get_iframe_tag(line)
     for item in extracted:
-        #print("item :", item)
+        print("iframe tag :", item)
         src = get_src(item)
-        #print("src :", src)
         if src == None:
             continue
-        elif src.startswith("/PostView.naver?"):
-            print("download from naver")
-            new_url = "https://blog.naver.com" + src
+        print("src :", src)
+
+        if src.startswith("/"):
+            """ 상대 경로 추가 파싱(재귀호출) """
+            new_url = "{}://{}{}".format(url_parse[0], url_parse[1],src)
             print("new url :", new_url)
-            html = get(new_url)
-            print("new content :", html)
+            html = get_text_from_url(new_url)
+            #print("new content :", html)
+            parse(html)
+        elif src.startswith("https://"):
+            """ 완전한 URL일 경우 추가로 파싱(재귀호출) """
+            new_url = src
+            print("new url :", new_url)
+            html = get_text_from_url(new_url)
+            #print("new content :", html)
             parse(html)
 
+""" 파싱하기 """
 def parse(html):
     if type(html) is str:
         parse_line(html)
@@ -74,16 +96,65 @@ def parse(html):
 
     return dic
 
-def get(url):
-    with urllib.request.urlopen(url) as response:
-        response_str = response.read().decode('utf-8')
-        return response_str
+""" URL에서 읽어오기 """
+def get_text_from_url(url):
+    global url_parse
+    import urllib.parse
+    url_parse = urllib.parse.urlparse(url)
+    print(url_parse)
+    response = get_from_url(url)
+    if not response:
+        return None
+    try:
+        print("Try to decode with utf-8")
+        return response.decode("utf-8")
+    except:
+        print("Try to decode with euc-kr")
+        return response.decode('euc-kr')
 
+""" URL에서 텍스트 읽어오기 """
+def get_from_url(url):
+    import urllib.request
+    print("get_from_url({})".format(url))
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            return response.read()
+    except:
+        print("Cannot open URL :", url)
+        return None
+
+""" URL에서 이미지 읽어보기 """
+def get_image_from_url(url):
+    return get_from_url(url)
+
+""" 파일에서 읽어오기 """
+def read_file(filename):
+    return open(filename, 'r').readlines()
 
 if __name__ == '__main__':
-    sample_file = open('sample3.html', 'r')
-    lines = sample_file.readlines()
-    dic = parse(lines)
-    print(dic)
-#    for key in dic:
-#        print(key)
+    lines = None
+
+    import sys
+    import os
+    if len(sys.argv) > 1:
+        """ 인자로 실행되었을 경우 """
+        if sys.argv[1].startswith("https://"):
+            url = sys.argv[1]
+            """ URL 형식이면 URL에서 가져옴 """
+            lines = get_text_from_url(url)
+        elif os.path.isfile(sys.argv[1]):
+            """ 존재하는 파일이면 파일에서 가져옴 """
+            lines = read_file(sys.argv[1])
+    elif os.path.isfile("sample3.html"):
+        lines = read_file("sample3.html")
+
+    """ 파일이 있으면 열어서 파싱 """
+    if lines:
+        dic = parse(lines)
+        print(dic)
+        for key in dic:
+            if key == "og:image" and dic[key] != "":
+                print("이미지 확인")
+                get_image_from_url(dic[key])
+    else:
+        print("Cannot read data")
