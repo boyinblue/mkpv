@@ -26,14 +26,15 @@ def make_preview():
 
     import url_preview
 
-    html = url_preview.get(url)
+    html = url_preview.get_text_from_url(url)
     if html != None:
         raw_textbox.delete(1.0, END)
         raw_textbox.insert(END, html)
     else:
         messagebox.showinfo("Unable to load URL", url)
 
-    dic = url_preview.parse(html.split('\n'))
+    dic = {}
+    url_preview.parse(html.split('\n'), dic)
 
     title_textbox.delete(1.0, END)
     title_textbox.insert(END, dic['og:title'])

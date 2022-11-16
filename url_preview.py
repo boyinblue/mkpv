@@ -20,9 +20,6 @@ p_iframe = re.compile("<iframe .*?>")
 """ iframe의 src 값 추출 """
 p_src = re.compile("src=\"[^\"]*?\"")
 
-""" 파싱된 값을 저장하는 dictionary """
-dic = {'og:title': '', 'og:description': '', 'og:image': ''}
-
 """ 정규표현식으로부터 값 추출하는 메쏘드들 """
 def get_meta_tag(line):
     extracted = p_meta.findall(line)
@@ -51,7 +48,7 @@ def get_src(line):
     return srcs[0][len("src="):].replace('\"', '').strip()
 
 """ 라인별로 값을 추출한다. """
-def parse_line(line):
+def parse_line(line, dic):
     #print("Line :", line)
     extracted = get_meta_tag(line)
     for item in extracted:
@@ -77,26 +74,26 @@ def parse_line(line):
             print("new url :", new_url)
             html = get_text_from_url(new_url)
             #print("new content :", html)
-            parse(html)
+            parse(html, dic)
         elif src.startswith("https://"):
             """ 완전한 URL일 경우 추가로 파싱(재귀호출) """
             new_url = src
             print("new url :", new_url)
             html = get_text_from_url(new_url)
             #print("new content :", html)
-            parse(html)
+            parse(html, dic)
 
 """ 파싱하기 """
-def parse(html):
+def parse(html, dic):
     if type(html) is str:
-        parse_line(html)
+        parse_line(html, dic)
     elif type(html) is list:
         for line in html:
-            parse_line(line)
+            parse_line(line, dic)
 
     return dic
 
-""" URL에서 읽어오기 """
+""" URL에서 텍스트 읽어오기 """
 def get_text_from_url(url):
     global url_parse
     import urllib.parse
@@ -112,13 +109,24 @@ def get_text_from_url(url):
         print("Try to decode with euc-kr")
         return response.decode('euc-kr')
 
-""" URL에서 텍스트 읽어오기 """
+""" URL에서 읽어오기 """
 def get_from_url(url):
     import urllib.request
     print("get_from_url({})".format(url))
     try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            return response.read()
+        req = urllib.request.Request(url)
+        response = urllib.request.urlopen(url, timeout=10)
+        return response.read()
+    except:
+        print("Cannot open URL : '{}'".format(url))
+        return None
+
+def post_from_url(url, data):
+    import requests
+    print("post_from_url({}, data={})".format(url, data))
+    try:
+        req = requests.post(url, data)
+        return req.content
     except:
         print("Cannot open URL :", url)
         return None
@@ -150,7 +158,8 @@ if __name__ == '__main__':
 
     """ 파일이 있으면 열어서 파싱 """
     if lines:
-        dic = parse(lines)
+        dic = {}
+        parse(lines, dic)
         print(dic)
         for key in dic:
             if key == "og:image" and dic[key] != "":
