@@ -49,7 +49,7 @@ def make_preview():
     dic_textbox.insert(END, dic)
 
     preview_textbox.delete(1.0, END)
-    preview_textbox.insert(END, url_preview.make_preview())
+    preview_textbox.insert(END, url_preview.make_preview(dic))
 
 ok_btn = ttk.Button(root, text="Make", width=10, command=make_preview)
 ok_btn.grid(column=0, row=1)
