@@ -33,7 +33,7 @@ def make_preview():
     else:
         messagebox.showinfo("Unable to load URL", url)
 
-    dic = {}
+    dic = {"url": url}
     url_preview.parse(html.split('\n'), dic)
 
     title_textbox.delete(1.0, END)
