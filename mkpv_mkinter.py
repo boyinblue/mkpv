@@ -49,11 +49,7 @@ def make_preview():
     dic_textbox.insert(END, dic)
 
     preview_textbox.delete(1.0, END)
-    preview_textbox.insert(END, "{{% assign preview_image_url = '{}' %}}\n".format(dic['og:image']))
-    preview_textbox.insert(END, "{{% assign preview_url = '{}' %}}\n".format(url))
-    preview_textbox.insert(END, "{{% assign preview_title = '{}' %}}\n".format(dic['og:title']))
-    preview_textbox.insert(END, "{{% assign preview_description = '{}' %}}\n".format(dic['og:description']))
-    preview_textbox.insert(END, "{% include body-preview.html %}\n")
+    preview_textbox.insert(END, url_preview.make_preview())
 
 ok_btn = ttk.Button(root, text="Make", width=10, command=make_preview)
 ok_btn.grid(column=0, row=1)

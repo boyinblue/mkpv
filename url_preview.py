@@ -146,10 +146,10 @@ def read_file(filename):
 """ dic로부터 preview 만들기 """
 def make_preview(dic):
     preview = ""
-    preview = preview + "{{% assign preview_image_url = '{}' %}}".format(dic['og:image'])
-    preview = preview + "{{% assign preview_url = '{}' %}}".format(url)
-    preview = preview + "{{% assign preview_title = '{}' %}}".format(dic['og:title'])
-    preview = preview + "{{% assign preview_description = '{}' %}}".format(dic['og:description'])
+    preview = preview + "{{% assign preview_image_url = '{}' %}}\n".format(dic['og:image'])
+    preview = preview + "{{% assign preview_url = '{}' %}}\n".format(dic['url'])
+    preview = preview + "{{% assign preview_title = '{}' %}}\n".format(dic['og:title'])
+    preview = preview + "{{% assign preview_description = '{}' %}}\n".format(dic['og:description'])
     preview = preview + "{% include body-preview.html %}"
     return preview
 
