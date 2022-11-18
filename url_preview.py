@@ -117,6 +117,8 @@ def get_from_url(url):
     print("get_from_url({})".format(url))
     try:
         req = urllib.request.Request(url)
+#        req = urllib.request.Request(url, 
+#                headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(url, timeout=10)
         return response.read()
     except:
