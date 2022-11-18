@@ -143,6 +143,16 @@ def get_image_from_url(url):
 def read_file(filename):
     return open(filename, 'r').readlines()
 
+""" dic로부터 preview 만들기 """
+def make_preview(dic):
+    preview = ""
+    preview = preview + "{{% assign preview_image_url = '{}' %}}".format(dic['og:image'])
+    preview = preview + "{{% assign preview_url = '{}' %}}".format(url)
+    preview = preview + "{{% assign preview_title = '{}' %}}".format(dic['og:title'])
+    preview = preview + "{{% assign preview_description = '{}' %}}".format(dic['og:description'])
+    preview = preview + "{% include body-preview.html %}"
+    return preview
+
 if __name__ == '__main__':
     lines = None
 
